@@ -1,16 +1,16 @@
 variable "project_id" {
   type = string
-  default = "YOUR_PROJECT_ID"
+  default = "astrafy-sandbox-greta"
 }
 
 variable "deployment_region" {
   type = string
-  default = "YOUR_REGION"
+  default = "europe-west1"
 }
 
 variable "docker_image" {
     type = string
-    default = "YOUR_DOCKER_IMAGE_URL"
+    default = "europe-west1-docker.pkg.dev/astrafy-sandbox-greta/dashboard-summary/dashboard-summary-image:latest"
 }
 
 variable "cloud_run_service_name" {
