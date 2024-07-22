@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
-const DropdownMenu = () => {
+const DropdownMenu = ({ selectedOption, handleOptionClick }) => {
     const [isOpen, setIsOpen] = useState(false);
+
     const options = [
         'Marketing Analyst',
         'Financial Reporter',
@@ -28,7 +29,7 @@ const DropdownMenu = () => {
                     backgroundColor: '#f0f0f0' 
                 }}
             >
-                What's your role in the organization?
+                {selectedOption ? `Selected: ${selectedOption}` : "What's your role in the organization?"}
             </button>
             {isOpen && (
                 <ul style={{ 
@@ -53,7 +54,7 @@ const DropdownMenu = () => {
                                 color: 'black', 
                                 opacity: 0.8 
                             }} 
-                            onClick={() => alert(`Selected: ${option}`)}
+                            onClick={() => handleOptionClick(option)}
                         >
                             {option}
                         </li>

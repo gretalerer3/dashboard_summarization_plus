@@ -29,6 +29,9 @@ import { io } from 'socket.io-client'
 const URL = process.env.NODE_ENV === 'production' ? process.env.WEBSOCKET_SERVICE!
  : 'http://localhost:5000'
 
+//const URL = process.env.WEBSOCKET_SERVICE! //remove when building bundle. 
+
+
 export const socket = io(URL,{
     timeout: 120000, 
     reconnection:true,
