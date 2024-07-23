@@ -27,7 +27,7 @@ SOFTWARE.
 import { io } from 'socket.io-client'
 
 const URL = process.env.NODE_ENV === 'production' ? process.env.WEBSOCKET_SERVICE!
- : 'http://localhost:5000'
+ : 'http://localhost:5001'
 
 //const URL = process.env.WEBSOCKET_SERVICE! //remove when building bundle. 
 
