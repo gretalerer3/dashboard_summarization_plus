@@ -108,6 +108,7 @@ io.on('connection', async (socket) => {
             Dashboard Detail: ${JSON.parse(data).description || ''} \n
             Query Details:  "Query Title: ${query.title} \n ${query.note_text !== '' || query.note_text !== null ? "Query Note: " + query.note_text : ''} \n Query Fields: ${query.queryBody.fields} \n Query Data: ${queryData} \n"
             `
+
             const queryPrompt = `
             You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. Follow the instructions below:
 
@@ -335,7 +336,7 @@ io.on('connection', async (socket) => {
  });
 });
 
-const PORT = process.env.PORT ? process.env.PORT : 5000
+const PORT = process.env.PORT ? process.env.PORT : 5001
 
 server.listen(PORT, () => {
     console.log("Listening on: ", PORT)
