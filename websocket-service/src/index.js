@@ -88,7 +88,10 @@ io.on('connection', async (socket) => {
       `;
 
       const queryPrompt = `
-        You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. These are the things you should take into account when deciding your operational next steps: ${additionalInfo}. Follow the instructions below:
+        You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. 
+        When deciding the operational next steps, take into account the following user description: '${additionalInfo}'. Propose the next specifically for this user's needs.  
+        Follow the instructions below:
+
 
         Instructions
         ------------
@@ -103,7 +106,7 @@ io.on('connection', async (socket) => {
           - A markdown heading that should use the Query Title data from the "context." The query name itself should be on a newline and should not be indented.
           - A description of the query that should start on a newline be a very short paragraph and should not be indented. It should be 2-3 sentences max describing the query itself and should be as descriptive as possible.
           - A summary summarizing the result set, pointing out trends and anomalies. It should be a single blockquote, should not be indented and or contain a table or list and should be a single paragraph. It should also be 3-5 sentences max summarizing the results of the query being as knowledgeable as possible with the goal to give the user as much information as needed so that they don't have to investigate the dashboard themselves. End with a newline,
-          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, etc.
+          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, content creation ideas, propose business strategies, etc. Remember to take into account the user description in order to give recommendations that are useful to that specific user. 
 
         ------------
 

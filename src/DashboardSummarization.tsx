@@ -225,17 +225,23 @@ export const DashboardSummarization: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', marginBottom: '1.6rem' }}>
           {!loading && data.length <= 0 ?
             <div className="layout" style={{ boxShadow: '0px', paddingBottom: '1.2rem', paddingTop: '1.2rem', height: '50%' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '1.2rem', opacity: '1', width: 'auto' }}>Dashboard Summarization</span>
-                <span style={{ fontSize: '0.9rem', opacity: '0.8', width: '60%' }}>Looker + Vertex AI</span>
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <img src="https://framerusercontent.com/assets/FKx0nfGT7P94XJIOhhXgZQ62GcM.png" alt="Company Logo" style={{ height: '50px', marginRight: '1rem' }} />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '1.5rem', opacity: '1', width: 'auto' }}> Dashboard Summarization</span>
+                  <span style={{ fontSize: '0.7rem', opacity: '0.8', width: '60%' }}>Powered by Astrafy</span>
+                </div>
               </div>
-              <input
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.9rem', opacity: '0.8', width: '100%', marginTop: '2rem'  }}>Enter any extra information you would like to give the prompt, so it provides more context accurate suggestions </span>
+                <input
                 type="text"
                 placeholder="Enter additional information"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                style={{ marginBottom: '1rem', padding: '0.5rem', fontSize: '1rem' }}
+                style={{ marginBottom: '1rem', padding: '0.5rem', fontSize: '0.9rem'}}
               />
+              </div>
               <button
                 className="button"
                 style={{ lineHeight: '20px', padding: '6px 16px' }}
