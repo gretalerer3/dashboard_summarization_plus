@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/vertexai": "^1.1.0",
+    "@langchain/langgraph": "^0.0.31",
     "@looker/sdk": "^23.20.1",
     "@looker/sdk-node": "^23.20.1",
     "@looker/sdk-rtl": "^21.6.1",

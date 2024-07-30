@@ -4,6 +4,7 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
 const { VertexAI } = require('@google-cloud/vertexai');
+const { MessageGraph, END } = require('@langchain/langgraph');
 const { LookerNodeSDK, NodeSettingsIniFile } = require('@looker/sdk-node');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -39,6 +40,10 @@ async function runLookerQuery(sdk, data) {
 
 // Initialize Vertex with your Cloud project and location
 const vertexAI = new VertexAI({ project: process.env.PROJECT, location: process.env.REGION });
+
+//initializing langchain graph
+const graph = new MessageGraph();
+
 // Instantiate the model
 const generativeModel = vertexAI.getGenerativeModel({
   model: 'gemini-1.0-pro-001',
@@ -65,7 +70,6 @@ io.on('connection', async (socket) => {
     const parsedData = JSON.parse(data);
     console.log("Parsed data:", parsedData);
     const additionalInfo = parsedData.additionalInfo;
-    console.log("Additional Info:", additionalInfo);
 
     if (!parsedData.queries || !Array.isArray(parsedData.queries)) {
       console.error("Queries field is missing or not an array");
@@ -83,13 +87,12 @@ io.on('connection', async (socket) => {
 
       const context = `
         Dashboard Detail: ${parsedData.description || ''} \n
-        Additional Info: ${additionalInfo} \n
         Query Details: "Query Title: ${query.title} \n ${query.note_text !== '' || query.note_text !== null ? "Query Note: " + query.note_text : ''} \n Query Fields: ${query.queryBody.fields} \n Query Data: ${queryData} \n"
       `;
 
       const queryPrompt = `
         You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. 
-        When deciding the operational next steps, take into account the following user description: '${additionalInfo}'. Propose the next specifically for this user's needs.  
+        In order to take operational next steps, take into account the following user description, requirements and objectives: '${additionalInfo}', in order for the next actions to specifically cater to this user's needs.  
         Follow the instructions below:
 
 
@@ -106,7 +109,7 @@ io.on('connection', async (socket) => {
           - A markdown heading that should use the Query Title data from the "context." The query name itself should be on a newline and should not be indented.
           - A description of the query that should start on a newline be a very short paragraph and should not be indented. It should be 2-3 sentences max describing the query itself and should be as descriptive as possible.
           - A summary summarizing the result set, pointing out trends and anomalies. It should be a single blockquote, should not be indented and or contain a table or list and should be a single paragraph. It should also be 3-5 sentences max summarizing the results of the query being as knowledgeable as possible with the goal to give the user as much information as needed so that they don't have to investigate the dashboard themselves. End with a newline,
-          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, content creation ideas, propose business strategies, etc. Remember to take into account the user description in order to give recommendations that are useful to that specific user. 
+          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending specific next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, content creation ideas, propose business strategy, etc. Ensure the next steps are tailored to the user's focus. For example, if the user says he needs help with a social media campaign, suggest Instagram content ideas.
 
         ------------
 
@@ -147,8 +150,6 @@ io.on('connection', async (socket) => {
         ----------
         
         Dashboard Detail:  
-
-        Additional Info: ${additionalInfo} 
 
         Query Details: "Query Title: ${query.title} \n ${query.note_text !== '' || query.note_text !== null ? "Query Note: " + query.note_text : ''} \n Query Fields: ${query.queryBody.fields} \n Query Data: ${queryData} \n"
       
