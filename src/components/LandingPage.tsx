@@ -25,7 +25,7 @@ SOFTWARE.
 */
 
 import React from 'react'
-import instructionsImage from './assets/pibebi.png';
+
 
 
 function GenerativeLogo(){
