@@ -20,6 +20,8 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello world</h1>');
 });
 
+
+
 async function runLookerQuery(sdk, data) {
   try {
     const query = await sdk.ok(sdk.create_query(data));
@@ -39,11 +41,20 @@ async function runLookerQuery(sdk, data) {
 
 // Initialize Vertex with your Cloud project and location
 const vertexAI = new VertexAI({ project: process.env.PROJECT, location: process.env.REGION });
+
+
 // Instantiate the model
 const generativeModel = vertexAI.getGenerativeModel({
   model: 'gemini-1.0-pro-001',
   generation_config: { max_output_tokens: 2500, temperature: 0.4, candidate_count: 1 }
 });
+
+const generativeModelPrompt = vertexAI.getGenerativeModel({
+    model: 'gemini-1.0-pro-001',
+    generation_config: { max_output_tokens: 2500, temperature: 0.4, candidate_count: 1 }
+  });
+
+
 
 const writeStructuredLog = (message) => {
   return {
@@ -67,6 +78,26 @@ io.on('connection', async (socket) => {
     const additionalInfo = parsedData.additionalInfo;
     console.log("Additional Info:", additionalInfo);
 
+    const promptIntroInstructions = `
+    You are a specialized business intelligence engineer and need to analyse a Looker dashboard and the underlying data structure.
+    The objective is to propose operational next steps tailored to the specific context just mentioned. 
+    Please provide three bullet points with examples of insightful next steps, you, as a business intelligence engineer, would take, in this specific context according to this specific needs:  ${additionalInfo}.
+    `;
+    
+    let generatedTextIntro;
+    try {
+      const promptIntro = await generativeModelPrompt.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptIntroInstructions }] }]
+      });
+    
+      // Extract the generated text
+      generatedTextIntro = promptIntro.response.candidates[0].content.parts[0].text;
+      console.log(generatedTextIntro);
+  
+    } catch (error) {
+      console.error("Error generating content with Vertex AI:", error);
+    }
+  
     if (!parsedData.queries || !Array.isArray(parsedData.queries)) {
       console.error("Queries field is missing or not an array");
       return;
@@ -87,14 +118,15 @@ io.on('connection', async (socket) => {
       `;
 
       const queryPrompt = `
-        You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. This is the context you should tailor to: ${additionalInfo}. Follow the instructions below:
+        You are a specialized answering assistant that can summarize a Looker dashboard and the underlying data and propose operational next steps drawing conclusions from the Query Details listed above. Follow the instructions below:
 
         Instructions
         ------------
 
-        - You always answer with markdown formatting
+        - You always answer with markdown formatting.
         - The markdown formatting you support: headings, bold, italic, links, lists, code blocks, and blockquotes.
         - You do not support images and never include images. You will be penalized if you render images. 
+        - You should direct your answers towards the specific user needs. You will be penalized for unfocused insights and unfocused actionable next steps. 
         - You will always format numerical values as either percentages or in dollar amounts rounded to the nearest cent. 
         - You should not indent any response.
         - Each dashboard query summary should start on a newline, should not be indented, and should end with a divider. 
@@ -102,7 +134,8 @@ io.on('connection', async (socket) => {
           - A markdown heading that should use the Query Title data from the "context." The query name itself should be on a newline and should not be indented.
           - A description of the query that should start on a newline be a very short paragraph and should not be indented. It should be 2-3 sentences max describing the query itself and should be as descriptive as possible.
           - A summary summarizing the result set, pointing out trends and anomalies. It should be a single blockquote, should not be indented and or contain a table or list and should be a single paragraph. It should also be 3-5 sentences max summarizing the results of the query being as knowledgeable as possible with the goal to give the user as much information as needed so that they don't have to investigate the dashboard themselves. End with a newline,
-          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, etc.
+          - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, etc. 
+        - Ask yourself whether your summary is relevant for the usecase given by the user. 
 
         ------------
 
@@ -125,10 +158,7 @@ io.on('connection', async (socket) => {
 
         
         ## Next Steps
-        * Look into the data for the month of March to determine if there was an issue in reporting and/or what sort of local events could have caused the spike
-        * Continue investing into search advertisement with common digital marketing strategies. IT would also be good to identify/breakdown this number by campaign source and see what strategies have been working well for Search.
-        * Display seems to be dropping off and variable. Use only during select months and optimize for heavily trafficed areas with a good demographic for the site retention.
-
+        ${generatedTextIntro}
         
 
 
@@ -136,11 +166,15 @@ io.on('connection', async (socket) => {
 
         Use this as an example of how to structure your response from a markdown standpoint. Do not verbatim copy the example text into your responses.
         
-        Below are details/context on the dashboard and queries. Use this context to help inform your summary. Remember to keep these summaries concise, to the point and actionable. The data will be in CSV format. Take note of any pivots and the sorts on the result set when summarizing. 
+        Below are details/context on the dashboard, user needs, and queries. Use this context to help inform your summary. Remember to keep these summaries concise, to the point and actionable. The data will be in CSV format. Take note of any pivots and the sorts on the result set when summarizing. 
 
         
         Context
         ----------
+
+        User Needs: 
+        This is a description of what the user wants to achieve by analyzing this dashboard:
+        ${additionalInfo}
         
         Dashboard Detail: 
         
@@ -327,6 +361,7 @@ io.on('connection', async (socket) => {
       console.error("Error during refinement:", error);
     }
   });
+
 
   socket.on('connect', () => {
     console.log("Connected!");
