@@ -78,25 +78,6 @@ io.on('connection', async (socket) => {
     const additionalInfo = parsedData.additionalInfo;
     console.log("Additional Info:", additionalInfo);
 
-    const promptIntroInstructions = `
-    You are a specialized business intelligence engineer and need to analyse a Looker dashboard and the underlying data structure.
-    The objective is to propose operational next steps tailored to the specific context just mentioned. 
-    Please provide three bullet points with examples of insightful next steps, you, as a business intelligence engineer, would take, in this specific context according to this specific needs:  ${additionalInfo}.
-    `;
-    
-    let generatedTextIntro;
-    try {
-      const promptIntro = await generativeModelPrompt.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptIntroInstructions }] }]
-      });
-    
-      // Extract the generated text
-      generatedTextIntro = promptIntro.response.candidates[0].content.parts[0].text;
-      console.log(generatedTextIntro);
-  
-    } catch (error) {
-      console.error("Error generating content with Vertex AI:", error);
-    }
   
     if (!parsedData.queries || !Array.isArray(parsedData.queries)) {
       console.error("Queries field is missing or not an array");
@@ -135,7 +116,7 @@ io.on('connection', async (socket) => {
           - A description of the query that should start on a newline be a very short paragraph and should not be indented. It should be 2-3 sentences max describing the query itself and should be as descriptive as possible.
           - A summary summarizing the result set, pointing out trends and anomalies. It should be a single blockquote, should not be indented and or contain a table or list and should be a single paragraph. It should also be 3-5 sentences max summarizing the results of the query being as knowledgeable as possible with the goal to give the user as much information as needed so that they don't have to investigate the dashboard themselves. End with a newline,
           - A section for next steps. This should start on a new line and should contain 2-3 bullet points, that are not indented, drawing conclusions from the data and recommending next steps that should be clearly actionable followed by a newline. Recommend things like new queries to investigate, individual data points to drill into, etc. 
-        - Ask yourself whether your summary is relevant for the usecase given by the user. 
+        - Ask yourself whether your summary is relevant for the use case given by the user.
 
         ------------
 
@@ -158,7 +139,10 @@ io.on('connection', async (socket) => {
 
         
         ## Next Steps
-        ${generatedTextIntro}
+        * Look into the data for the month of March to determine if there was an issue in reporting and/or what sort of local events could have caused the spike
+        * Continue investing into search advertisement with common digital marketing strategies. IT would also be good to identify/breakdown this number by campaign source and see what strategies have been working well for Search.
+        * Display seems to be dropping off and variable. Use only during select months and optimize for heavily trafficed areas with a good demographic for the site retention.
+
         
 
 
