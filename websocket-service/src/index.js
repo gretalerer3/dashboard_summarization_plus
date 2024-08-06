@@ -45,15 +45,9 @@ const vertexAI = new VertexAI({ project: process.env.PROJECT, location: process.
 
 // Instantiate the model
 const generativeModel = vertexAI.getGenerativeModel({
-  model: 'gemini-1.0-pro-001',
+  model: 'gemini-1.5-flash',
   generation_config: { max_output_tokens: 2500, temperature: 0.4, candidate_count: 1 }
 });
-
-const generativeModelPrompt = vertexAI.getGenerativeModel({
-    model: 'gemini-1.0-pro-001',
-    generation_config: { max_output_tokens: 2500, temperature: 0.4, candidate_count: 1 }
-  });
-
 
 
 const writeStructuredLog = (message) => {
